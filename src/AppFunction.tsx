@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import AddTodo from "./function-components/AddTodo";
 import TodoList from "./function-components/TodoList";
 import TodoFilter from "./function-components/TodoFilter";
@@ -10,12 +10,6 @@ import "./App.css";
 // - Replace componentDidMount / componentDidUpdate with useEffect for localStorage sync
 // - Replace class methods with regular const functions
 // - Remove render(), return JSX directly
-
-interface AppState {
-  todos: Todo[];
-  filter: FilterType;
-  nextId: number;
-}
 
 function App() {
   const [todos, setTodos] = useState<Todo[]>(() =>

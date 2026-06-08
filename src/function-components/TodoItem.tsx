@@ -17,11 +17,11 @@ interface TodoItemProps {
 function TodoItem(props: TodoItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState("");
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isEditing) {
-      inputRef?.current.focus();
+      inputRef.current?.focus();
     }
   }, [isEditing]);
 

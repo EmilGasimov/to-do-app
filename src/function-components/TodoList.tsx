@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import TodoItem from "./TodoItem";
 import { Todo, SortType } from "../types";
 
@@ -23,24 +23,14 @@ interface TodoListProps {
 function TodoList(props: TodoListProps) {
   const [sortBy, setSortBy] = useState<SortType>("alphabetical");
 
-  const getSortedTodos: Todo[] = () => {
-    const { todos } = props;
+  const { onToggle, onDelete, onEdit, todos } = props;
 
+  const sortedTodos = useMemo(() => {
     if (sortBy === "status") {
-      return useMemo(
-        () =>
-          [...todos].sort((a, b) => Number(a.completed - Number(b.completed))),
-        [todos]
-      );
+      return [...todos].sort((a, b) => Number(a.completed) - Number(b.completed));
     }
-    return useMemo(
-      () => [...todos].sort((a, b) => a.text.localeCompare(b.text)),
-      [todos]
-    );
-  };
-
-  const { onToggle, onDelete, onEdit } = props;
-  const sortedTodos = getSortedTodos();
+    return [...todos].sort((a, b) => a.text.localeCompare(b.text));
+  }, [todos, sortBy]);
 
   return (
     <div className="todo-list-wrapper">
