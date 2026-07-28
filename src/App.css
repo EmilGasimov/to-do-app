@@ -13,6 +13,7 @@
 .app__title {
   font-size: 3rem;
   font-weight: 100;
+  font-family: "Times New Roman", Times, serif;
   letter-spacing: 0.2em;
   color: rgba(175, 47, 47, 0.4);
   text-transform: lowercase;
