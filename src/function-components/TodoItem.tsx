@@ -9,9 +9,9 @@ import { Todo } from "../types";
 
 interface TodoItemProps {
   todo: Todo;
-  onToggle: (id: number) => void;
-  onDelete: (id: number) => void;
-  onEdit: (id: number, text: string) => void;
+  onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
+  onEdit: (id: string, text: string) => void;
 }
 
 function TodoItem(props: TodoItemProps) {
@@ -37,7 +37,7 @@ function TodoItem(props: TodoItemProps) {
   const handleEditSubmit = () => {
     const trimmed = editValue.trim();
     if (trimmed) {
-      props.onEdit(props.todo.id, trimmed);
+      props.onEdit(props.todo._id, trimmed);
     }
     setIsEditing(false);
   };
@@ -48,11 +48,11 @@ function TodoItem(props: TodoItemProps) {
   };
 
   const handleToggle = () => {
-    props.onToggle(props.todo.id);
+    props.onToggle(props.todo._id);
   };
 
   const handleDelete = () => {
-    props.onDelete(props.todo.id);
+    props.onDelete(props.todo._id);
   };
 
   return (

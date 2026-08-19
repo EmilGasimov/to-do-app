@@ -15,9 +15,9 @@ const SORT_OPTIONS: { value: SortType; label: string }[] = [
 
 interface TodoListProps {
   todos: Todo[];
-  onToggle: (id: number) => void;
-  onDelete: (id: number) => void;
-  onEdit: (id: number, text: string) => void;
+  onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
+  onEdit: (id: string, text: string) => void;
 }
 
 interface TodoListState {
@@ -76,7 +76,7 @@ class TodoList extends Component<TodoListProps, TodoListState> {
           <ul className="todo-list">
             {sortedTodos.map((todo) => (
               <TodoItem
-                key={todo.id}
+                key={todo._id}
                 todo={todo}
                 onToggle={onToggle}
                 onDelete={onDelete}

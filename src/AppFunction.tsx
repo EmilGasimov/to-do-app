@@ -11,42 +11,110 @@ import "./App.css";
 // - Replace class methods with regular const functions
 // - Remove render(), return JSX directly
 
+const API_URL = "http://localhost:5001/api/todos";
+
 function App() {
-  const [todos, setTodos] = useState<Todo[]>(() =>
-    JSON.parse(localStorage.getItem("todos") ?? "[]")
-  );
+  const [todos, setTodos] = useState<Todo[]>([]);
   const [filter, setFilter] = useState<FilterType>("all");
-  const [nextId, setNextId] = useState<number>(() => {
-    const saved: Todo[] = JSON.parse(localStorage.getItem("todos") ?? "[]");
-    return saved.length ? Math.max(...saved.map((t) => t.id)) + 1 : 1;
-  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }, [todos]);
+    const loadTodos = async () => {
+      try {
+        
+        const response = await fetch(API_URL);
 
-  const addTodo = (text: string) => {
-    const newTodo: Todo = { id: nextId, text: text.trim(), completed: false };
-    setTodos([...todos, newTodo]);
-    setNextId((prev) => prev + 1);
+        if (!response.ok) {
+          throw new Error("Failed to load todos");
+        }
+
+        const data = await response.json();
+        setTodos(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTodos();
+  }, []);
+
+  const addTodo = async (text: string) => {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create todo");
+    }
+
+    const newTodo = await response.json();
+
+    setTodos((prev) => [...prev, newTodo]);
   };
 
-  const toggleTodo = (id: number) => {
+  const toggleTodo = async (id: string) => {
+    const todo = todos.find((t) => t._id === id);
+
+    if (!todo) return;
+
+    const response = await fetch(
+      `${API_URL}/${id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          completed: !todo.completed,
+        }),
+      }
+    );
+
+    const updated = await response.json();
+
     setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))
+      prev.map((t) => (t._id === id ? updated : t))
     );
   };
 
-  const deleteTodo = (id: number) =>
-    setTodos((prev) => prev.filter((t) => t.id !== id));
+  const deleteTodo = async (id: string) => {
+    await fetch(`${API_URL}/${id}`, {
+      method: "DELETE",
+    });
 
-  const editTodo = (id: number, newText: string) => {
+    setTodos((prev) => prev.filter((t) => t._id !== id));
+  };
+
+  const editTodo = async (id: string, text: string) => {
+    const response = await fetch(
+      `${API_URL}/${id}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+      }
+    );
+
+    const updated = await response.json();
+
     setTodos((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, text: newText.trim() } : t))
+      prev.map((t) => (t._id === id ? updated : t))
     );
   };
 
-  const clearCompleted = () => {
+  const clearCompleted = async () => {
+    await fetch(`${API_URL}/completed`, {
+      method: "DELETE",
+    });
+
     setTodos((prev) => prev.filter((t) => !t.completed));
   };
 
