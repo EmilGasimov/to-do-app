@@ -11,7 +11,7 @@ import "./App.css";
 // - Replace class methods with regular const functions
 // - Remove render(), return JSX directly
 
-const API_URL = "http://localhost:5001/api/todos";
+const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5001"}/api/todos`;
 
 function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
