@@ -1,29 +1,35 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { connectDB } from "./db.js";
-import todoRoutes from "./routes/todos.js";
-
-const app = express();
-import swaggerUi from "swagger-ui-express";
-import { swaggerSpec } from "./swagger.js";
-
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { connectDB } from "./db.js";
+import todoRoutes from "./routes/todos.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const app = express();
+
+app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
+app.use(express.json());
+
+app.use(async (_req, _res, next) => {
+  await connectDB();
+  next();
+});
+
+app.get("/", (_req, res) => res.json({ message: "Todo API is running" }));
+app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
+
+// Swagger docs
+const CDN = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14";
 
 app.get("/api-docs.json", (_req, res) => {
   const specPath = path.resolve(__dirname, "swagger.json");
   const spec = JSON.parse(fs.readFileSync(specPath, "utf-8"));
   res.json(spec);
-}); 
-const CDN = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14";
-
-app.get("/api-docs.json", (_req, res) => {
-  res.json(swaggerSpec);
 });
 
 app.get("/api-docs", (_req, res) => {
@@ -50,20 +56,6 @@ app.get("/api-docs", (_req, res) => {
   `);
 });
 
-app.get("/api-docs.json", (_req, res) => {
-  res.json(swaggerSpec);
-});
-
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
-app.use(express.json());
-
-app.use(async (_req, _res, next) => {
-  await connectDB();
-  next();
-});
-
-app.get("/", (_req, res) => res.json({ message: "Todo API is running" }));
-app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
 app.use("/api/todos", todoRoutes);
 
 export default app;
