@@ -8,6 +8,18 @@ const app = express();
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./swagger.js";
 
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.get("/api-docs.json", (_req, res) => {
+  const specPath = path.resolve(__dirname, "swagger.json");
+  const spec = JSON.parse(fs.readFileSync(specPath, "utf-8"));
+  res.json(spec);
+}); 
 const CDN = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14";
 
 app.get("/api-docs.json", (_req, res) => {
