@@ -10,14 +10,32 @@ import { swaggerSpec } from "./swagger.js";
 
 const CDN = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14";
 
+app.get("/api-docs.json", (_req, res) => {
+  res.json(swaggerSpec);
+});
+
 app.get("/api-docs", (_req, res) => {
-  res.send(swaggerUi.generateHTML(swaggerSpec, {
-    customCssUrl: `${CDN}/swagger-ui.min.css`,
-    customJs: [
-      `${CDN}/swagger-ui-bundle.min.js`,
-      `${CDN}/swagger-ui-standalone-preset.min.js`,
-    ],
-  }));
+  res.send(`
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Todo API Docs</title>
+  <link rel="stylesheet" href="${CDN}/swagger-ui.min.css">
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="${CDN}/swagger-ui-bundle.min.js"></script>
+  <script>
+    window.onload = () => {
+      window.ui = SwaggerUIBundle({
+        url: "/api-docs.json",
+        dom_id: "#swagger-ui",
+      });
+    };
+  </script>
+</body>
+</html>
+  `);
 });
 
 app.get("/api-docs.json", (_req, res) => {
