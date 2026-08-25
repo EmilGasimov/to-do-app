@@ -4,7 +4,7 @@ import Todo from "../models/Todo.js";
 const router = Router();
 
 /**
- * @swagger
+ * @openapi
  * /api/todos:
  *   get:
  *     summary: Get all todos
@@ -33,7 +33,7 @@ router.get("/", async (_req, res) => {
 
 
 /**
- * @swagger
+ * @openapi
  * /api/todos:
  *   post:
  *     summary: Create a new todo
@@ -83,7 +83,7 @@ router.post("/", async (req, res) => {
 });
 
 /**
- * @swagger
+ * @openapi
  * /api/todos/{id}:
  *   patch:
  *     summary: Update a todo
@@ -162,7 +162,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 /**
- * @swagger
+ * @openapi
  * /api/todos/completed:
  *   delete:
  *     summary: Delete all completed todos
@@ -199,7 +199,7 @@ router.delete("/completed", async (_req, res) => {
 });
 
 /**
- * @swagger
+ * @openapi
  * /api/todos/{id}:
  *   delete:
  *     summary: Delete a todo
