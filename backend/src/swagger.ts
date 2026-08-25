@@ -75,7 +75,6 @@ const options: swaggerJsdoc.Options = {
             },
         },
     },
-
     apis: ["./src/routes/*.ts"],
 };
 
