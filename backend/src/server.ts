@@ -5,6 +5,24 @@ import { connectDB } from "./db.js";
 import todoRoutes from "./routes/todos.js";
 
 const app = express();
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./swagger.js";
+
+const CDN = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14";
+
+app.get("/api-docs", (_req, res) => {
+  res.send(swaggerUi.generateHTML(swaggerSpec, {
+    customCssUrl: `${CDN}/swagger-ui.min.css`,
+    customJs: [
+      `${CDN}/swagger-ui-bundle.min.js`,
+      `${CDN}/swagger-ui-standalone-preset.min.js`,
+    ],
+  }));
+});
+
+app.get("/api-docs.json", (_req, res) => {
+  res.json(swaggerSpec);
+});
 
 app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
 app.use(express.json());
