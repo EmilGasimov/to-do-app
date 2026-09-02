@@ -13,7 +13,7 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5001"}/api/todos`;
+const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5001"}/`;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
