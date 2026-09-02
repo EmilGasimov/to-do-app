@@ -1,13 +1,16 @@
 import { Router } from "express";
 import Todo from "../models/Todo.js";
+import { requireAuth } from "../middleware/requireAuth.js";
 
 const router = Router();
+
+router.use(requireAuth); // every route below requires a valid session cookie
 
 /**
  * @openapi
  * /api/todos:
  *   get:
- *     summary: Get all todos
+ *     summary: Get all todos for the logged-in user
  *     tags:
  *       - Todos
  *     responses:
@@ -22,15 +25,18 @@ const router = Router();
  *       500:
  *         description: Server error
  */
-router.get("/", async (_req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const todos = await Todo.find().sort({ createdAt: -1 });
+    const todos = await Todo.find({ userId: req.userId }).sort({ createdAt: -1 });
     res.json(todos);
   } catch {
     res.status(500).json({ message: "Failed to get todos" });
   }
 });
 
+function escapeRegex(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 /**
  * @openapi
@@ -71,9 +77,20 @@ router.post("/", async (req, res) => {
       return;
     }
 
+    const duplicate = await Todo.findOne({
+      userId: req.userId,
+      text: { $regex: `^${escapeRegex(text)}$`, $options: "i" },
+    });
+
+    if (duplicate) {
+      res.status(409).json({ message: "You already have a task with this name" });
+      return;
+    }
+
     const todo = await Todo.create({
       text,
       completed: false,
+      userId: req.userId,
     });
 
     res.status(201).json(todo);
@@ -105,10 +122,6 @@ router.post("/", async (req, res) => {
  *     responses:
  *       200:
  *         description: Todo updated successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Todo'
  *       404:
  *         description: Todo not found
  *       500:
@@ -134,6 +147,17 @@ router.patch("/:id", async (req, res) => {
         return;
       }
 
+      const duplicate = await Todo.findOne({
+        userId: req.userId,
+        _id: { $ne: req.params.id },
+        text: { $regex: `^${escapeRegex(text)}$`, $options: "i" },
+      });
+
+      if (duplicate) {
+        res.status(409).json({ message: "You already have a task with this name" });
+        return;
+      }
+
       updates.text = text;
     }
 
@@ -141,13 +165,10 @@ router.patch("/:id", async (req, res) => {
       updates.completed = Boolean(req.body.completed);
     }
 
-    const todo = await Todo.findByIdAndUpdate(
-      req.params.id,
+    const todo = await Todo.findOneAndUpdate(
+      { _id: req.params.id, userId: req.userId },
       updates,
-      {
-        new: true,
-        runValidators: true,
-      }
+      { new: true, runValidators: true }
     );
 
     if (!todo) {
@@ -165,26 +186,19 @@ router.patch("/:id", async (req, res) => {
  * @openapi
  * /api/todos/completed:
  *   delete:
- *     summary: Delete all completed todos
+ *     summary: Delete all completed todos for the logged-in user
  *     tags:
  *       - Todos
  *     responses:
  *       200:
  *         description: Completed todos deleted
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 deletedCount:
- *                   type: integer
- *                   example: 3
  *       500:
  *         description: Server error
  */
-router.delete("/completed", async (_req, res) => {
+router.delete("/completed", async (req, res) => {
   try {
     const result = await Todo.deleteMany({
+      userId: req.userId,
       completed: true,
     });
 
@@ -222,7 +236,7 @@ router.delete("/completed", async (_req, res) => {
  */
 router.delete("/:id", async (req, res) => {
   try {
-    const todo = await Todo.findByIdAndDelete(req.params.id);
+    const todo = await Todo.findOneAndDelete({ _id: req.params.id, userId: req.userId });
 
     if (!todo) {
       res.status(404).json({ message: "Todo not found" });

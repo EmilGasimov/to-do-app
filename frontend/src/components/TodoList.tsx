@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import TodoItem from "./TodoItem";
 import { Todo, SortType } from "../types";
 

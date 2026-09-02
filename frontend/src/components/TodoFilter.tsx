@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import { Component } from "react";
 import { FilterType } from "../types";
 
 const FILTERS: { value: FilterType; label: string }[] = [

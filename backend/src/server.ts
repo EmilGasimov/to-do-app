@@ -3,16 +3,22 @@ import express from "express";
 import cors from "cors";
 import fs from "fs";
 import path from "path";
+import cookieParser from 'cookie-parser';
 import { fileURLToPath } from "url";
 import { connectDB } from "./db.js";
 import todoRoutes from "./routes/todos.js";
+import authRoutes from "./routes/auth.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.use(cors({ origin: process.env.CLIENT_URL || "http://localhost:5173" }));
+app.use(cors({
+  origin: process.env.CLIENT_URL || "http://localhost:5173",
+  credentials: true,
+}));
+app.use(cookieParser());
 app.use(express.json());
 
 app.use(async (_req, _res, next) => {
@@ -22,6 +28,7 @@ app.use(async (_req, _res, next) => {
 
 app.get("/", (_req, res) => res.json({ message: "Todo API is running" }));
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
+app.use('/auth', authRoutes);
 
 // Swagger docs
 const CDN = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14";
@@ -61,6 +68,6 @@ app.use("/api/todos", todoRoutes);
 export default app;
 
 if (process.env.NODE_ENV !== "production") {
-  const PORT = Number(process.env.PORT) || 5000;
+  const PORT = Number(process.env.PORT) || 5001;
   app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
 }
